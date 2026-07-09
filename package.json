@@ -1,0 +1,91 @@
+{
+  "name": "luna-vscode-ext",
+  "displayName": "Luna Code (Claude Code MCP replica)",
+  "description": "Reverse-engineered replica of the Claude Code VS Code extension's MCP server and host integration. Spawns the real bundled `claude` binary and exposes an MCP server to it over stdio.",
+  "version": "0.1.0",
+  "publisher": "luna",
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "luna-vscode.start",
+        "title": "Luna Code: Start Session"
+      },
+      {
+        "command": "luna-vscode.stop",
+        "title": "Luna Code: Stop Session"
+      }
+    ],
+    "configuration": {
+      "title": "Luna Code",
+      "properties": {
+        "lunaCode.claudeBinaryPath": {
+          "type": "string",
+          "scope": "machine",
+          "description": "Absolute path to the bundled `claude` native binary (from the official VSIX resources/native-binary/claude)."
+        },
+        "lunaCode.workspaceCwd": {
+          "type": "string",
+          "description": "Working directory passed to claude. Defaults to the first workspace folder."
+        },
+        "lunaCode.permissionMode": {
+          "type": "string",
+          "enum": [
+            "default",
+            "manual",
+            "acceptEdits",
+            "plan",
+            "bypassPermissions"
+          ],
+          "default": "default"
+        },
+        "lunaCode.enableExtensionMcp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Register the in-process `claude-vscode-extension` MCP server (name + version mirror the official extension) so Claude can call IDE/back-end tools."
+        },
+        "lunaCode.enableIdeMcp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Start the HTTP/WS `Claude Code {Editor} MCP` server carrying the 12 IDE-interaction tools (openFile/getDiagnostics/executeCode/...). Writes a lock file under ~/.claude/ide/<port>.lock so the bundled claude binary can discover it."
+        },
+        "lunaCode.model": {
+          "type": "string",
+          "description": "Model id passed to claude. Defaults to claude's own default."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run build && vsce package --no-dependencies",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.94.0",
+    "@types/ws": "^8.5.10",
+    "@vscode/vsce": "^2.30.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ws": "^8.16.0",
+    "zod": "^3.23.0"
+  }
+}
